@@ -4,19 +4,26 @@ import { UpdatePokemonDto } from './dto/update-pokemon.dto';
 import { Pokemon } from './entities/pokemon.entity';
 import { isValidObjectId, Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class PokemonService {
 
   private pokemons : Pokemon[] = [];
 
+  private defaultLimit : number;
 
   constructor(
 
     //para poder inecjtar un modelo de mongoose
     @InjectModel( Pokemon.name )
-    private readonly pokemonModel : Model<Pokemon>
-  ){}
+    private readonly pokemonModel : Model<Pokemon>,
+
+    private readonly configService : ConfigService
+  ){
+    this.defaultLimit = this.configService.get<number>('defaultLimit') || 7;
+  }
 
 
   async create(createPokemonDto: CreatePokemonDto) {
@@ -32,8 +39,15 @@ export class PokemonService {
 
   }
 
-  findAll() {
-    return `This action returns all pokemon`;
+  findAll( paginationDto : PaginationDto) {
+
+    const {limit = this.defaultLimit, offset = 0} =  paginationDto
+
+    return this.pokemonModel.find()
+      .limit( limit )
+      .skip ( offset )
+      .sort({ no: 1 })
+      .select('-__v')
   }
 
   async findOne(term: string) {
@@ -88,6 +102,13 @@ export class PokemonService {
     if(deletedCount === 0) throw new BadRequestException(`Pokemon not found with id ${id}`);
 
     return;
+  }
+  async deleteAll(){
+    await this.pokemonModel.deleteMany({});
+  }
+
+  async inserMany(arrayPokemon: CreatePokemonDto[]){
+    await this.pokemonModel.insertMany(arrayPokemon);
   }
 
 

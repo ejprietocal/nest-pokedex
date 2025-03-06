@@ -20,6 +20,19 @@ npm - g @nest/cli
 ```
 docker-compose up -d
 ```
+5. Clonar el archivo ___.env.template___ y renombrar la copia a ___.env___ 
+
+6. llenar las variables de entorno definidas en el ``` .env ```
+
+8. Ejecutar la app de desarrollo en dev:
+```
+npm run start:dev
+```
+
+7. Reconstruir la base de datos con la semilla
+```
+localhost:3000/api/v2/seed
+```
 
 ## Stack usado
 * MongoDB
